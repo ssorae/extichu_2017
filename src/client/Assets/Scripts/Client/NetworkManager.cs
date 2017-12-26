@@ -6,7 +6,19 @@ using UnityEngine;
 
 public abstract class NetworkManager : MonoBehaviour
 {
-	protected NetworkManager() { }
+	protected NetworkManager()
+	{
+		this.OnMessageReceived.Clear();
+		this._temporalHandlers.Clear();
+
+		foreach (MessageType eachMsgType in Enum.GetValues(typeof(MessageType)))
+		{
+			if (false == eachMsgType.GetType().Name.StartsWith("SC"))
+				continue;
+			this.OnMessageReceived.Add(eachMsgType, delegate { });
+			this._temporalHandlers.Add(eachMsgType, delegate { });
+		}
+	}
 
 	public static NetworkManager Instance
 	{
@@ -29,13 +41,34 @@ public abstract class NetworkManager : MonoBehaviour
 
 	public abstract void SendMessage<TPacket>(MessageType packetType, TPacket packet);
 
-	public abstract void SendMessage<TPacket, TResPacket>
+	public void SendMessage<TPacket, TResPacket>
 		(MessageType packetType, TPacket packet,
 		MessageType replyType, Action<TResPacket> onReply)
-		where TPacket : class where TResPacket : class;
+		where TPacket : class where TResPacket : class
+	{
+		_temporalHandlers.Add(replyType,
+			reply =>
+			{
+				var converted = reply as TResPacket;
+				if (converted != null)
+					onReply.Invoke(converted);
+			});
+
+		this.SendMessage(packetType, packet);
+	}
 
 	public abstract bool IsConnected { get; }
 
 	public Dictionary<MessageType, Action<object>> OnMessageReceived { get; }
 		= new Dictionary<MessageType, Action<object>>();
+
+	protected Dictionary<MessageType, Action<object>> _temporalHandlers
+		= new Dictionary<MessageType, Action<object>>();
+
+	protected void notifyServerMessage(MessageType msgType, object msg)
+	{
+		this.OnMessageReceived[msgType].Invoke(msg);
+		this._temporalHandlers[msgType].Invoke(msg);
+		this._temporalHandlers[msgType] = delegate { };
+	}
 }

@@ -24,8 +24,10 @@ public class GameManager : MonoBehaviour
 
 	private void installHandlers()
 	{
-		NetworkManager.Instance.OnMessageReceived[MessageType.sc_game_start] += this.onSCGameStart;
-		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_joined] += this.onSCPlayerJoined;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_game_start] 
+			+= this.onSCGameStart;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_joined] 
+			+= this.onSCPlayerJoined;
 	}
 
 	private void onSCPlayerJoined(object source)

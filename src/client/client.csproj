@@ -117,6 +117,7 @@
     <Compile Include="Assets\Funapi\SessionId.cs" />
     <Compile Include="Assets\Scripts\Base\CoroutineResult.cs" />
     <Compile Include="Assets\Scripts\Client\DummyNetwork.cs" />
+    <Compile Include="Assets\Scripts\Client\DummyServer.cs" />
     <Compile Include="Assets\Scripts\Client\GameManager.cs" />
     <Compile Include="Assets\Scripts\Client\GameUI.cs" />
     <Compile Include="Assets\Scripts\Client\NetworkManager.cs" />

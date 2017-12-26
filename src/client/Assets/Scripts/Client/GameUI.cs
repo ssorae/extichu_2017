@@ -7,15 +7,30 @@ using UnityEngine.UI;
 public class GameUI : MonoBehaviour
 {
 	[SerializeField]
-	private Text _nicknameComponent = default(Text);
+	private InputField _nicknameInput = default(InputField);
+
+	[SerializeField]
+	private List<Text> _nametags = null;
 
 	// TODO(sorae): impl..
 	public bool IsJoiningMsgEnabled { get; set; }
 
+	public bool IsNicknameInputEnabled
+	{
+		get
+		{
+			return _nicknameInput.gameObject.activeSelf;
+		}
+		set
+		{
+			_nicknameInput.gameObject.SetActive(value);
+		}
+	}
+
 	public void Awake()
 	{
-		if (_nicknameComponent == null)
-			Debug.LogError($"[{nameof(GameUI)}] {nameof(_nicknameComponent)} is null");
+		if (_nicknameInput == null)
+			Debug.LogError($"[{nameof(GameUI)}] {nameof(_nicknameInput)} is null");
 	}
 
 	public enum ReadyButtonMode
@@ -43,7 +58,7 @@ public class GameUI : MonoBehaviour
 
 	public IEnumerator WaitForNicknameInput(Func<string, bool> nicknameValidator)
 	{
-		while (false == nicknameValidator(_nicknameComponent.text))
+		while (false == nicknameValidator(_nicknameInput.text))
 			yield return null;
 	}
 }

@@ -7,20 +7,6 @@ public class ServerNetwork : NetworkManager
 {
 	private FunapiSession _session;
 
-	public void Awake()
-	{
-		this.OnMessageReceived.Clear();
-		this._temporalHandlers.Clear();
-
-		foreach (MessageType eachMsgType in Enum.GetValues(typeof(MessageType)))
-		{
-			if (false == eachMsgType.GetType().Name.StartsWith("SC"))
-				continue;
-			this.OnMessageReceived.Add(eachMsgType, delegate { });
-			this._temporalHandlers.Add(eachMsgType, delegate { });
-		}
-	}
-
 	public override bool IsConnected
 	{
 		get
@@ -40,23 +26,7 @@ public class ServerNetwork : NetworkManager
 	}
 
 	public override void SendMessage<TPacket>(MessageType packetType, TPacket packet)
-	{
-		_session.SendMessage(packetType, packet);
-	}
-
-	public override void SendMessage<TPacket, TResPacket>(MessageType packetType, TPacket packet,
-		MessageType replyType, Action<TResPacket> onReply)
-	{
-		_temporalHandlers.Add(replyType,
-			reply =>
-			{
-				var converted = reply as TResPacket;
-				if (converted != null)
-					onReply.Invoke(converted);
-			});
-
-		_session.SendMessage(packetType, packet);
-	}
+		=> _session.SendMessage(packetType, packet);
 
 	private void onTransportEvent(TransportProtocol protocol, TransportEventType type)
 	{
@@ -91,11 +61,6 @@ public class ServerNetwork : NetworkManager
 			msg_type, MiniJSON.Json.Serialize(msg));
 #endif
 
-		this.OnMessageReceived[msgType].Invoke(msg);
-		this._temporalHandlers[msgType].Invoke(msg);
-		this._temporalHandlers[msgType] = delegate { };
+		base.notifyServerMessage(msgType, msg);
 	}
-
-	private Dictionary<MessageType, Action<object>> _temporalHandlers 
-		= new Dictionary<MessageType, Action<object>>();
 }
