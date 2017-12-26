@@ -1,0 +1,21 @@
+title EXTichu Sequence Diagram
+
+Client->+Server: CSJoinMatch
+Server-->-Client: SCJoinMatch\n(nickname of players)
+
+Client->+Server: CSSetReady
+Server-->-Client: SCSetReady
+Server-->Other Clients: SCSetReady
+
+note over Server: Wait for all clients are ready
+
+Server->+Client: SCGameStart
+Server->Client: SCHandout\n(Contains infos of 8 cards)
+
+Client->+Server: CSLargeTichu\n(T/F)
+Server-->-Client: SCLargeTichu\n(T/F)
+Server-->Other Clients: SCLargeTichu\n(T/F)
+
+note over Server: Wait for all clients are ready\n(LT or No)
+
+Server->Client: SCHandout\n(Contains infos of 6 cards)

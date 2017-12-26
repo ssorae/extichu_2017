@@ -30,22 +30,15 @@ message PbCard
 message PbRoomState
 {
 	optional string nickname_1 = 1;
-	repeated PbCard cards_1 = 2;
-	
-	optional string nickname_2 = 3;
-	repeated PbCard cards_2 = 4;
-
-	optional string nickname_3 = 5;
-	repeated PbCard cards_3 = 6;
-
-	optional string nickname_4 = 7;
-	repeated PbCard cards_4 = 8;
+	optional string nickname_2 = 2;
+	optional string nickname_3 = 3;
+	optional string nickname_4 = 4;
 }
 
 enum ErrorCode
 {
 	EC_OK = 0;
-	EC_FAILED = 1; //NOTE(sorae): 세분화 한 뒤 지울 것
+	EC_FAILED = 1; //TODO(sorae): 세분화한 뒤 지울 것
 
 }
 
@@ -60,9 +53,43 @@ message SCJoinMatch
 	optional PbRoomState room_state = 2;
 }
 
+message CSSetReady
+{
+	required bool is_ready = 1; // set or unset readiness
+}
+
+message SCSetReady
+{
+	required ErrorCode result = 1;
+}
+
+message SCPlayerReady
+{
+	required int32 client_index = 1;
+	required bool is_ready = 2;
+}
+
+message SCGameStart //NOTE(sorae): 꼭 필요할까?
+{
+	required string game_id = 1; // unique id for each game
+}
+
+message SCHandout
+{
+	// 나 말고 다른 플레이어들의 카드는 hidden 을 채워서 보내줌
+	repeated PbCard cards_1 = 1; // player1
+	repeated PbCard cards_2 = 2;
+	repeated PbCard cards_3 = 3;
+	repeated PbCard cards_4 = 4;
+}
+
 extend FunMessage 
 {
   optional CSJoinMatch cs_join_match = 101;
   optional SCJoinMatch sc_join_match = 102;
-
+  optional CSSetReady cs_set_ready = 103;
+  optional SCSetReady sc_set_ready = 104;
+  optional SCPlayerReady sc_player_ready = 105;
+  optional SCGameStart sc_game_start = 106;
+  optional SCHandout sc_handout = 107;
 }

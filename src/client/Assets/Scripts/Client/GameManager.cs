@@ -1,44 +1,113 @@
-﻿using System;
+﻿using extichu_messages;
+using Fun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 
-namespace EXTichu.Client
+public class GameManager : MonoBehaviour
 {
+	[SerializeField]
+	private GameUI _ui = null;
 
-	public class GameManager : MonoBehaviour
+	[SerializeField]
+	private string _hostAddress = "127.0.0.1";
+
+	private string _nickname = default(string);
+
+	public void Awake()
 	{
-		[SerializeField]
-		private GameUI _ui = null;
+		installHandlers();
+	}
 
-		[SerializeField]
-		private string _hostAddress = "127.0.0.1";
+	private void installHandlers()
+	{
 
-		private NetworkClient _network = null;
+	}
 
-		public void Awake()
+	public IEnumerator Start()
+	{
+		yield return this.mainRoutine();
+	}
+
+	private IEnumerator mainRoutine()
+	{
+		yield return waitForNicknameInput();
+
+		yield return connectToServer();
+
+		var isJoinSuccess = new CoroutineResult<bool>();
+		yield return joinRoom(isJoinSuccess);
+		if (false == isJoinSuccess)
 		{
+			// TODO(sorae): handle ex case..
 		}
 
-		public IEnumerator Start()
+		_ui.EnableSetReadyButton(setReady);
+
+		//yield return waitForPacket<SCGameStart>(MessageType.sc_game_start, null);
+
+
+	}
+
+	private void setReady(bool isReady)
+	{
+		NetworkManager.Instance.SendMessage<CSSetReady, SCSetReady>(
+			MessageType.cs_set_ready, new CSSetReady { is_ready = isReady },
+			MessageType.sc_set_ready, reply =>
+			{
+				if (reply.result != extichu_messages.ErrorCode.EC_OK)
+					Debug.LogError("SCSetReady.result != EC_OK");
+				else
+					_ui.ReadyButtonStatus = isReady ? GameUI.ReadyButtonMode.kCancel : GameUI.ReadyButtonMode.kReady;
+			});
+	}
+
+	private IEnumerator waitForNicknameInput()
+	{
+		Func<string, bool> isValidNickname = source =>
+			!!!string.IsNullOrEmpty(source) && source.Length >= 2 && source.Length <= 8;
+
+		yield return _ui.WaitForNicknameInput(isValidNickname);
+	}
+
+	private IEnumerator joinRoom(CoroutineResult<bool> isSuccess)
+	{
+		SCJoinMatch response = null;
+
+		_ui.IsJoiningMsgEnabled = true;
+
+		NetworkManager.Instance.SendMessage<CSJoinMatch, SCJoinMatch>(
+			MessageType.cs_join_match, new CSJoinMatch { nickname = _nickname },
+			MessageType.sc_join_match, res => response = res);
+
+		while (response == null)
+			yield return null;
+
+		if (response.result != extichu_messages.ErrorCode.EC_OK)
 		{
-			yield return connectToServer();
-			// connect to server
-
-			yield return joinRoom();
-
-			//_ui.ReadyButtonEnabled = true;
-		}
-
-		private IEnumerator joinRoom()
-		{
-			throw new NotImplementedException();
-		}
-
-		private IEnumerator connectToServer()
-		{
+			isSuccess.Set(false);
 			yield break;
 		}
+
+		_ui.IsJoiningMsgEnabled = false;
+
+		// TODO(sorae): set view from SCJoinMatch datas
+
+	}
+
+	private IEnumerator connectToServer()
+	{
+		NetworkManager.Instance.Connect(_hostAddress);
+
+		while (!!!NetworkManager.Instance.IsConnected)
+			yield return null;
+
+		yield break;
+	}
+
+	private void onSessionEventReceived(SessionEventType type, string session_id)
+	{
+		// TODO(sorae): impl..
 	}
 }
