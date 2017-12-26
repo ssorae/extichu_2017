@@ -53,6 +53,12 @@ message SCJoinMatch
 	optional PbRoomState room_state = 2;
 }
 
+message SCPlayerJoined
+{
+	required int32 player_id = 1;
+	required string nickname = 2;
+}
+
 message CSSetReady
 {
 	required bool is_ready = 1; // set or unset readiness
@@ -87,9 +93,10 @@ extend FunMessage
 {
   optional CSJoinMatch cs_join_match = 101;
   optional SCJoinMatch sc_join_match = 102;
-  optional CSSetReady cs_set_ready = 103;
-  optional SCSetReady sc_set_ready = 104;
-  optional SCPlayerReady sc_player_ready = 105;
-  optional SCGameStart sc_game_start = 106;
-  optional SCHandout sc_handout = 107;
+  optional SCPlayerJoined sc_player_joined = 103;
+  optional CSSetReady cs_set_ready = 111;
+  optional SCSetReady sc_set_ready = 112;
+  optional SCPlayerReady sc_player_ready = 113;
+  optional SCGameStart sc_game_start = 120;
+  optional SCHandout sc_handout = 121;
 }

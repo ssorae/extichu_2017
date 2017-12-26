@@ -31,6 +31,11 @@ public class GameUI : MonoBehaviour
 		// TODO(sorae): bind setReady to ready button
 	}
 
+	public void ShowGameStart()
+	{
+		// TODO(sorae): impl..
+	}
+
 	public void DisableReadyButton()
 	{
 		// TODO(sorae): impl..

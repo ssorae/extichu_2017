@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
 
 	private string _nickname = default(string);
 
+	private bool _isGameStarted = false;
+
 	public void Awake()
 	{
 		installHandlers();
@@ -22,7 +24,23 @@ public class GameManager : MonoBehaviour
 
 	private void installHandlers()
 	{
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_game_start] += this.onSCGameStart;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_joined] += this.onSCPlayerJoined;
+	}
 
+	private void onSCPlayerJoined(object source)
+	{
+		var packet = source as SCPlayerJoined;
+
+		// TODO(sorae): set view
+	}
+
+	private void onSCGameStart(object source)
+	{
+		var packet = source as SCGameStart;
+
+		_ui.ShowGameStart();
+		this._isGameStarted = true;
 	}
 
 	public IEnumerator Start()
@@ -45,7 +63,9 @@ public class GameManager : MonoBehaviour
 
 		_ui.EnableSetReadyButton(setReady);
 
-		//yield return waitForPacket<SCGameStart>(MessageType.sc_game_start, null);
+		while (!!!_isGameStarted)
+			yield return null;
+
 
 
 	}
