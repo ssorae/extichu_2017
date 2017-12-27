@@ -10,10 +10,18 @@ public class GameUI : MonoBehaviour
 	private NicknameInputPopup _nicknameInputPopup = null;
 
 	[SerializeField]
-	private List<Text> _nametags = null;
+	private List<NameTag> _nametags = null;
 
-	// TODO(sorae): impl..
-	public bool IsJoiningMsgEnabled { get; set; }
+	public IReadOnlyList<NameTag> NameTags { get { return _nametags; } }
+
+	[SerializeField]
+	private GameObject _joiningMessageObject = null;
+	
+	public bool IsJoiningMsgEnabled
+	{
+		get { return _joiningMessageObject.activeSelf; }
+		set { _joiningMessageObject.SetActive(value); }
+	}
 
 	public bool IsNicknameInputEnabled
 	{
@@ -31,6 +39,9 @@ public class GameUI : MonoBehaviour
 	{
 		if (_nicknameInputPopup == null)
 			Debug.LogError($"[{nameof(GameUI)}] {nameof(_nicknameInputPopup)} is null");
+
+		this._nametags.ForEach(eachTag => eachTag.IsEnabled = false);
+		this.IsJoiningMsgEnabled = false;
 	}
 
 	public enum ReadyButtonMode

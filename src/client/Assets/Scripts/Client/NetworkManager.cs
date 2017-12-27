@@ -6,14 +6,14 @@ using UnityEngine;
 
 public abstract class NetworkManager : MonoBehaviour
 {
-	protected NetworkManager()
+	public virtual void Awake()
 	{
 		this.OnMessageReceived.Clear();
 		this._temporalHandlers.Clear();
 
 		foreach (MessageType eachMsgType in Enum.GetValues(typeof(MessageType)))
 		{
-			if (false == eachMsgType.GetType().Name.StartsWith("SC"))
+			if (false == eachMsgType.ToString().StartsWith("sc_"))
 				continue;
 			this.OnMessageReceived.Add(eachMsgType, delegate { });
 			this._temporalHandlers.Add(eachMsgType, delegate { });
@@ -46,13 +46,13 @@ public abstract class NetworkManager : MonoBehaviour
 		MessageType replyType, Action<TResPacket> onReply)
 		where TPacket : class where TResPacket : class
 	{
-		_temporalHandlers.Add(replyType,
-			reply =>
+		_temporalHandlers[replyType] 
+			+= reply =>
 			{
 				var converted = reply as TResPacket;
 				if (converted != null)
 					onReply.Invoke(converted);
-			});
+			};
 
 		this.SendMessage(packetType, packet);
 	}

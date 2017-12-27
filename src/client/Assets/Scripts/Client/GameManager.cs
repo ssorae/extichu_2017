@@ -91,6 +91,8 @@ public class GameManager : MonoBehaviour
 			!!!string.IsNullOrEmpty(source) && source.Length >= 2 && source.Length <= 8;
 
 		yield return _ui.WaitForNicknameInput(isValidNickname);
+
+		_ui.IsNicknameInputEnabled = false;
 	}
 
 	private IEnumerator joinRoom(CoroutineResult<bool> isSuccess)
@@ -115,7 +117,7 @@ public class GameManager : MonoBehaviour
 		_ui.IsJoiningMsgEnabled = false;
 
 		// TODO(sorae): set view from SCJoinMatch datas
-
+		
 	}
 
 	private IEnumerator connectToServer()
