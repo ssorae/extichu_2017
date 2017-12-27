@@ -1,5 +1,4 @@
-/EX!Tichu.sln
 /Library
-/EX!Tichu.csproj
-/EX!Tichu.Plugins.csproj
 /Temp
+/*.sln
+/*.csproj

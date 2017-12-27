@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class GameUI : MonoBehaviour
 {
 	[SerializeField]
-	private InputField _nicknameInput = default(InputField);
+	private NicknameInputPopup _nicknameInputPopup = null;
 
 	[SerializeField]
 	private List<Text> _nametags = null;
@@ -19,18 +19,18 @@ public class GameUI : MonoBehaviour
 	{
 		get
 		{
-			return _nicknameInput.gameObject.activeSelf;
+			return _nicknameInputPopup.IsEnabled;
 		}
 		set
 		{
-			_nicknameInput.gameObject.SetActive(value);
+			_nicknameInputPopup.IsEnabled = value;
 		}
 	}
 
 	public void Awake()
 	{
-		if (_nicknameInput == null)
-			Debug.LogError($"[{nameof(GameUI)}] {nameof(_nicknameInput)} is null");
+		if (_nicknameInputPopup == null)
+			Debug.LogError($"[{nameof(GameUI)}] {nameof(_nicknameInputPopup)} is null");
 	}
 
 	public enum ReadyButtonMode
@@ -58,7 +58,23 @@ public class GameUI : MonoBehaviour
 
 	public IEnumerator WaitForNicknameInput(Func<string, bool> nicknameValidator)
 	{
-		while (false == nicknameValidator(_nicknameInput.text))
+		var nickname = string.Empty;
+		var isOkButtonClicked = false;
+
+		_nicknameInputPopup.OnOKButtonClicked
+			+= input =>
+			{
+				nickname = input;
+				isOkButtonClicked = true;
+			};
+
+		while(true)
+		{
+			if (isOkButtonClicked && nicknameValidator(nickname))
+				yield break;
+
+			isOkButtonClicked = false;
 			yield return null;
+		}
 	}
 }
