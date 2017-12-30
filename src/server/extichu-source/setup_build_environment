@@ -1,0 +1,379 @@
+#! /usr/bin/python
+# vim: fileencoding=utf-8 tabstop=2 softtabstop=2 shiftwidth=2 expandtab
+#
+# Copyright (C) 2013-2015 iFunFactory Inc. All Rights Reserved.
+#
+# This work is confidential and proprietary to iFunFactory Inc. and
+# must not be used, disclosed, copied, or distributed without the prior
+# consent of iFunFactory Inc.
+
+""" 이 script 는 funapi_initiator 로 생성한 source tree 로부터
+build 환경을 생성하는 script 이다."""
+
+
+import gettext
+import gflags
+import logging
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+
+from jinja2 import Template
+
+
+gettext.textdomain('funapi')
+
+
+def _(s):
+  """ Gettext wrapper
+  """
+  return gettext.gettext(s).decode('utf-8')
+
+
+LOG = logging.getLogger('funapi')
+
+
+FLAGS = gflags.FLAGS
+
+gflags.DEFINE_enum(
+    'type', 'makefile', ['clion', 'eclipse', 'makefile'],
+    'Build environment type to use.')
+
+gflags.DEFINE_string(
+    'eclipse_workspace_dir', None,
+    'Path to an Eclipse workspace dir')
+
+
+# Script 의 위치를 통해 source dir과 funapi root 을 알아낸다.
+# 이 script 는 project 의 source dir 에 symlink로 설치됨을 가정한다.
+SOURCE_DIR = os.path.relpath(os.path.dirname(sys.argv[0]))
+
+# 이 script 의 원본은 $FUNAPI_ROOT/bin 에 설치됨을 가정한다.
+SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
+FUNAPI_ROOT = '/'.join(SCRIPT_DIR.split('/')[:-1])
+FUNAPI_DATA_DIR = '%s/share/funapi' % FUNAPI_ROOT
+
+
+def extract_project_name_from_cmake(path):
+  """주어진 CMakeLists.txt 로부터 project 이름을 추출한다.
+
+  @return project name
+  @param path 대상 CMakeLists.txt 의 경로.
+  """
+  for line in open(path):
+    matched = re.match(r'^[pP][rR][oO][jJ][eE][cC][tT]\((\w+)', line)
+    if matched:
+      return matched.groups()[0]
+  sys.exit(1)
+
+
+def create_dir_if_not_exists(path):
+  """주어진 directory 가 존재하지 않을 경우 생성한다.
+
+  만약 해당 이름의 무언가가 존재한다면 그것이 directory 임을 확인한다.
+  만일 symlink 인 경우는 따라 들어간다.
+
+  @param path 확인/생성할 directory 경로.
+  """
+  # 만약 directory 가 존재하지 않는다면 생성한다.
+  if os.path.exists(path):
+    if os.path.isdir(path):
+      LOG.warn(_('Target directory "%s" exists.'), path)
+    else:
+      LOG.fatal2(_('"%s" already exists and not a directory'), path)
+  else:
+    LOG.info(_('Target directory "%s" does not exist. Creating.'), path)
+    os.makedirs(path)
+
+
+def camel(snake_string):
+  """주어진 단어들을 camel 형태로 변환함."""
+  tokens = re.split(r'_', snake_string)
+  camel_string = ''
+  for token in tokens:
+    camel_string += token.capitalize()
+  return camel_string
+
+
+def log_and_terminate(msg, *args, **kwargs):
+  """메시지를 출력하고 terminate 한다."""
+  LOG.fatal(msg, *args, **kwargs)
+  sys.exit(1)
+
+
+def run_command_or_crash_with_error(args):
+  """주어진 명령을 수행한다.
+
+  만일 error 가 발생한 경우 에러를 출력하고 crash 한다.
+
+  @param args list 형태의 명령어 및 명령어 인자들.
+  """
+  dev_null = open(os.devnull, 'w')
+  try:
+    subprocess.check_call(args, stdout=dev_null)
+  except subprocess.CalledProcessError, exception:
+    LOG.fatal2(_('Failed to run command "%s": %s')
+               % (' '.join(args), str(exception)))
+
+
+# pylint: disable=R0914
+def build_for_eclipse(pname, compo_name, build_dir, debug_dir, release_dir):
+  """Eclipse 용 build 환경을 만들어준다."""
+  # Workspace 디렉토리를 만들어 준다.
+  workspace_dir = os.path.relpath('%s/workspace' % build_dir)
+  if FLAGS.eclipse_workspace_dir:
+    create_dir_if_not_exists(FLAGS.eclipse_workspace_dir)
+    # 이제 주어진 경로에 symlink 를 걸어준다.
+    # 만일 같은 이름으로 무언가가 이미 있다면 에러 상황이다.
+    if os.path.exists(workspace_dir):
+      if not os.path.samefile(workspace_dir, FLAGS.eclipse_workspace_dir):
+        LOG.fatal2(_('Symlink "%s" pointing to other file already exists.')
+                   % workspace_dir)
+      else:
+        LOG.info(_('Symlink to "%s" already exits. Reusing.'),
+                 FLAGS.eclipse_workspace_dir)
+    else:
+      LOG.info(_('Creating a symlink to "%s".'), FLAGS.eclipse_workspace_dir)
+      os.symlink(FLAGS.eclipse_workspace_dir, workspace_dir)
+  else:
+    create_dir_if_not_exists(workspace_dir)
+
+  # Debug project 를 만든다.
+  # 이때 source project 역시 생성한다.
+  # build type 을 debug 로 주는 경우 CXXFLAGS에 -g 가 추가된다.
+  LOG.info(_('Creating a debug project in "%s".'), debug_dir)
+  cmd = ['cmake', '-DCMAKE_BUILD_TYPE=Debug',
+         '-DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=ON',
+         '-GEclipse CDT4 - Unix Makefiles',
+         '-H%s' % SOURCE_DIR, '-B%s' % debug_dir]
+  run_command_or_crash_with_error(cmd)
+
+  # Project import 를 빠르게 하기 위해서 pathentry 를 먼저 disable 한다.
+  cproj1 = open('%s/.cproject' % debug_dir).read()
+  cproj1_stuffed = re.sub(r'(<pathentry.*/>)', r'<!--FUNAPI \1 -->', cproj1)
+  print >> open('%s/.cproject' % debug_dir, 'w'), cproj1_stuffed
+
+  # Release project 를 만든다.
+  # 이때 source project 역시 생성한다.
+  # Build type 을 release with debug 로 주는 경우 CXXFLAGS에
+  # -O2 -g가 추가된다.
+  LOG.info(_('Creating a release project in "%s".'), release_dir)
+  cmd = ['cmake', '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
+         '-DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=ON',
+         '-GEclipse CDT4 - Unix Makefiles',
+         '-H%s' % SOURCE_DIR, '-B%s' % release_dir]
+  run_command_or_crash_with_error(cmd)
+
+  # Project import 를 빠르게 하기 위해서 pathentry 를 먼저 disable 한다.
+  cproj2 = open('%s/.cproject' % release_dir).read()
+  cproj2_stuffed = re.sub(r'(<pathentry.*/>)', r'<!--FUNAPI \1 -->', cproj2)
+  print >> open('%s/.cproject' % release_dir, 'w'), cproj2_stuffed
+
+  # Eclipse workspace 에 생성한 project들을 추가한다.
+  # 이때 source project 역시 workspace 에 포함시킨다.
+  LOG.info(_('Importing the created projects into an Eclipse workspace.'))
+  LOG.info(_('This may take a few minutes. Please be patient.'))
+  cmd = ['eclipse', '-nosplash',
+         '-application', 'org.eclipse.cdt.managedbuilder.core.headlessbuild',
+         '-importAll', SOURCE_DIR,
+         '-importAll', debug_dir,
+         '-importAll', release_dir,
+         '-data', workspace_dir]
+  run_command_or_crash_with_error(cmd)
+
+  # cproject의 pathentry 를 원상태로 돌린다.
+  print >> open('%s/.cproject' % debug_dir, 'w'), cproj1
+  print >> open('%s/.cproject' % release_dir, 'w'), cproj2
+
+  # c/c++ symbol index 를 다시 만들게 하기위해 *.pdom 파일을 지운다.
+  shutil.rmtree('%s/.metadata/.plugins/org.eclipse.cdt.core/' % workspace_dir)
+
+  # Eclipse 의 run/debug button 활성화를 위해 launch 를 생성해준다.
+  LOG.info(_('Generating Eclipse run launches.'))
+  launch_dir = ('%s/.metadata/.plugins/org.eclipse.debug.core/.launches'
+                % workspace_dir)
+  create_dir_if_not_exists(launch_dir)
+
+  template = open('%s/eclipse/eclipse.run.launch.in' % FUNAPI_DATA_DIR).read()
+  template = re.sub(r'@FUNAPI_ROOT@', FUNAPI_ROOT, template)
+  template = re.sub(r'@project_name@', pname, template)
+  template = re.sub(r'@component_name@', compo_name, template)
+  template = re.sub(r'@ComponentName@', camel(compo_name), template)
+
+  types = [('DebugBuild', 'Debug@debug'), ('ReleaseBuild', 'Release@release')]
+  for (launch_name, build_type) in types:
+    handle = open('%s/%s.launch' % (launch_dir, launch_name), 'w')
+    handle.write(re.sub(r'@build_type@', build_type, template))
+    handle.close()
+
+  # Eclipse 를 실행하기 위한 launcher script 를 만들어준다.
+  LOG.info(_('Creating an Eclipse launcher script in %s.') % build_dir)
+  template = open('%s/bash/eclipse.launcher.sh' % FUNAPI_DATA_DIR).read()
+  script = '%s/run_eclipse.sh' % build_dir
+  handle = open(script, 'w')
+  handle.write(template)
+  handle.close()
+
+  # 생성한 script 에 writing permission 을 준다.
+  os.chmod(script, stat.S_IRWXU)
+
+  LOG.info(_('Everything seems OK.'))
+
+  tips = """
+
+  %s
+
+  %s
+
+  %s
+  %s
+
+  %s
+  %s
+  %s
+
+  %s
+  %s
+  %s
+
+""" % (_('[[Tips]]'),
+       _('You can trigger Eclipse by running "%s".') % script,
+       _('If you want to make changes in source files or project settings,\n  work under an Eclipse project named "%s-Source@%s-source".') % (pname, pname),  # pylint: disable=C0301
+       _('If you need to add/remove source files, do it under "%s/src" and update\n  "ADDITIONAL_CPP_SOURCES" variable in "%s/src/CMakeLists.txt".') % (SOURCE_DIR, SOURCE_DIR),  # pylint: disable=C0301
+       _('To generate a build package, trigger a build target named "package"\n  through the Eclipse "Make Target" panel.'),  # pylint: disable=C0301
+       _('Build package can be in TGZ, DEB and/or RPM.'),
+       _('Take a look into "%s/CMakeLists.txt" for this feature.') % SOURCE_DIR,
+       _('To increase a build version number, edit "VERSION" in the source tree.'),  # pylint: disable=C0301
+       _('If you are using GIT or SVN, you can append a commit id or a revision number\n  to your build package automatically.'),  # pylint: disable=C0301
+       _('Please see "%s/CMakeLists.txt" to turn on/off this feature.') % SOURCE_DIR)  # pylint: disable=C0301
+  LOG.info(tips)
+
+
+# pylint: disable=W0613
+def build_for_makefile(pname, compo_name, build_dir, debug_dir, release_dir):
+  """Makefile 을 이용하는 build 환경을 만들어준다."""
+  # Debug project 를 만든다.
+  # build type 을 debug 로 주는 경우 CXXFLAGS에 -g 가 추가된다.
+  LOG.info(_('Creating a debug project in "%s".'), debug_dir)
+  cmd = ['cmake', '-DCMAKE_BUILD_TYPE=Debug',
+         '-GUnix Makefiles',
+         '-H%s' % SOURCE_DIR, '-B%s' % debug_dir]
+  run_command_or_crash_with_error(cmd)
+
+  # Release project 를 만든다.
+  # build type 을 release with debug 로 주는 경우 CXXFLAGS에
+  # -O2 -g가 추가된다.
+  LOG.info(_('Creating a release project in "%s".'), release_dir)
+  cmd = ['cmake', '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
+         '-GUnix Makefiles',
+         '-H%s' % SOURCE_DIR, '-B%s' % release_dir]
+  run_command_or_crash_with_error(cmd)
+
+  LOG.info(_('Everything seems OK.'))
+  LOG.info('')
+
+  tips = """
+
+  %s
+
+  %s
+
+  %s
+  %s
+
+  %s
+
+  %s
+
+  %s
+  %s
+
+  %s
+  %s
+  %s
+
+""" % (_('[[Tips]]'),
+       _('To build the project, run "make" under either "%s" or "%s".') % (debug_dir, release_dir),  # pylint: disable=C0301
+       _('If you want to make changes in source files or project settings, work under "%s".') % SOURCE_DIR,  # pylint: disable=C0301
+       _('If you need to add/remove source files, do it under "%s/src" and update\n  "ADDITIONAL_CPP_SOURCES" variable in "%s/src/CMakeLists.txt".') % (SOURCE_DIR, SOURCE_DIR),  # pylint: disable=C0301
+       _('To generate a build package, run a command:'),
+       '    make package',
+       _('Build package can be in TGZ, DEB and/or RPM.'),
+       _('Take a look into "%s/CMakeLists.txt" for this feature.') % SOURCE_DIR,
+       _('To increase a build version number, edit "VERSION" in the source tree.'),  # pylint: disable=C0301
+       _('If you are using GIT or SVN, you can append a commit id or a revision number\n  to your build package automatically.'),  # pylint: disable=C0301
+       _('Please see "%s/CMakeLists.txt" to turn on/off this feature.') % SOURCE_DIR)  # pylint: disable=C0301
+  LOG.info(tips)
+
+
+def build_for_clion(pname, project_root, *args):
+  LOG.info(_('Creating CLion configuration'))
+  TEMPLATE_ROOT = '/usr/share/funapi/clion'
+  # create .idea
+  CONF_ROOT = os.path.join(project_root, '.idea')
+  if not os.path.exists(CONF_ROOT):
+    os.makedirs(CONF_ROOT)
+
+  def render_to_file(filename, **kwargs):
+    tmpl = Template(open(os.path.join(TEMPLATE_ROOT, filename)).read())
+    with open(os.path.join(CONF_ROOT, filename), 'w+') as fout:
+      fout.write(tmpl.render(**kwargs))
+
+  project_dir = os.path.basename(os.path.abspath(project_root))
+
+  for config_file in ('misc.xml', 'modules.xml', 'vcs.xml', 'workspace.xml'):
+    render_to_file(config_file, project_dir=project_dir, project=pname)
+
+  shutil.copy(os.path.join(TEMPLATE_ROOT, 'project.iml'),
+              os.path.join(CONF_ROOT, '{}.iml'.format(project_dir)))
+
+
+def main(argv):
+  """Script 의 메인 함수"""
+  # command line arguments 를 먼저 parsing 한다.
+  argv = FLAGS(argv)
+
+  # Project 이름을 알아낸다.
+  try:
+    pname = extract_project_name_from_cmake('%s/CMakeLists.txt' % SOURCE_DIR)
+  except OSError, exception:
+    LOG.fatal2(_('Failed to open CMakeLists.txt: %s') % str(exception))
+  except AssertionError:
+    LOG.fatal2(_('Failed to extract project name'))
+
+  # Component 이름은 project 이름 끝에 '_server' 를 붙인 형태이다.
+  compo_name = '%s_server' % pname
+
+  if FLAGS.type != 'clion':
+    # Target directory 를 정하고 이를 생성한다.
+    # Source directory 와 같은 level 에 $pname-build 형태이다.
+    build_dir = os.path.relpath('%s/../%s-build' % (SOURCE_DIR, pname))
+    create_dir_if_not_exists(build_dir)
+
+    debug_dir = os.path.relpath('%s/debug' % build_dir)
+    create_dir_if_not_exists(debug_dir)
+
+    release_dir = os.path.relpath('%s/release' % build_dir)
+    create_dir_if_not_exists(release_dir)
+
+  # 만약 유저가 workspace 를 명시적으로 정의했다면,
+  # 해당 directory 에 symlink 를 건다.
+  # 그렇지 않을 경우 workspace directory 를 생성해준다.
+  if FLAGS.type == 'eclipse':
+    build_for_eclipse(pname, compo_name, build_dir, debug_dir, release_dir)
+  elif FLAGS.type == 'makefile':
+    build_for_makefile(pname, compo_name, build_dir, debug_dir, release_dir)
+  elif FLAGS.type == 'clion':
+    build_for_clion(pname, SOURCE_DIR)
+  else:
+    LOG.fatal2(_('Invalid build environment type "%s".') % FLAGS.type)
+
+
+# Main entry
+if __name__ == '__main__':
+  logging.basicConfig(format='%(message)s', level=logging.INFO)
+  LOG.fatal2 = log_and_terminate
+  main(sys.argv)
