@@ -108,11 +108,6 @@ NavMeshSettings:
     tileSize: 256
     accuratePlacement: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &55753015 stripped
-GameObject:
-  m_PrefabParentObject: {fileID: 1749853037630920, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-    type: 2}
-  m_PrefabInternal: {fileID: 1957495166}
 --- !u!1 &534348492
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,11 +335,6 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 1957495166}
   m_Script: {fileID: 11500000, guid: b1db94db5815bd044945f528536938a5, type: 3}
---- !u!1 &1696194231 stripped
-GameObject:
-  m_PrefabParentObject: {fileID: 1280708647364792, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-    type: 2}
-  m_PrefabInternal: {fileID: 1957495166}
 --- !u!1 &1757020684
 GameObject:
   m_ObjectHideFlags: 0
@@ -594,90 +584,9 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 224369048726874172, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: -47.248238
-      objectReference: {fileID: 0}
-    - target: {fileID: 224369048726874172, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224019575057158178, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: -27.468987
-      objectReference: {fileID: 0}
-    - target: {fileID: 224019575057158178, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224848974710238910, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 107.37307
-      objectReference: {fileID: 0}
-    - target: {fileID: 224848974710238910, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224397365024083528, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 107.37307
-      objectReference: {fileID: 0}
-    - target: {fileID: 224397365024083528, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224518037424635384, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 107.37307
-      objectReference: {fileID: 0}
-    - target: {fileID: 224518037424635384, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224645949404687016, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 107.37307
-      objectReference: {fileID: 0}
-    - target: {fileID: 224645949404687016, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114798531428997398, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: _readyButton
-      value: 
-      objectReference: {fileID: 2005899819}
-    - target: {fileID: 114798531428997398, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: _readyButtonReadyObj
-      value: 
-      objectReference: {fileID: 1696194231}
-    - target: {fileID: 114798531428997398, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-        type: 2}
-      propertyPath: _readyButtonCancelObj
-      value: 
-      objectReference: {fileID: 55753015}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5934c1ef2460fea4c9a7f22f4fcc691a, type: 2}
   m_IsPrefabParent: 0
---- !u!114 &2005899819 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114793660311202548, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
-    type: 2}
-  m_PrefabInternal: {fileID: 1957495166}
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 --- !u!1 &2135491612
 GameObject:
   m_ObjectHideFlags: 0
