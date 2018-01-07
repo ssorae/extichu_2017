@@ -20,13 +20,23 @@ import "funapi/network/fun_message.proto";
 */
 message PbCard
 {
+	enum SpecialCardType
+	{
+		DRAGON  = 0;
+		PHEONIX = 1;
+		DOGGY   = 2;
+		MAHJONG = 3;
+	}
 	enum Shape
 	{
-		SHAPE_SPECIAL = 0;
-		SHAPE_1 = 1;
-		SHAPE_2 = 2;
-		SHAPE_3 = 3;
-		SHAPE_4 = 4;
+		SHAPE_1       = 1;
+		SHAPE_2       = 2;
+		SHAPE_3       = 3;
+		SHAPE_4       = 4;
+		SHAPE_DRAGON  = 5;
+		SHAPE_PHOENIX = 6;
+		SHAPE_DOGGY   = 7;
+		SHAPE_MAHJONG = 8;
 	}
 	required bool is_hidden = 1;
 	optional int32 number = 2;
