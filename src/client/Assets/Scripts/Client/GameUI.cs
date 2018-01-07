@@ -16,7 +16,14 @@ public class GameUI : MonoBehaviour
 
 	[SerializeField]
 	private GameObject _joiningMessageObject = null;
-	
+
+	[SerializeField]
+	private Button _readyButton = null;
+	[SerializeField]
+	private GameObject _readyButtonReadyObj = null;
+	[SerializeField]
+	private GameObject _readyButtonCancelObj = null;
+
 	public bool IsJoiningMsgEnabled
 	{
 		get { return _joiningMessageObject.activeSelf; }
@@ -50,11 +57,24 @@ public class GameUI : MonoBehaviour
 		kCancel = 1,
 	}
 
-	public ReadyButtonMode ReadyButtonStatus { get; set; }
+	private ReadyButtonMode _readyButtonStatus = default(ReadyButtonMode);
+	public ReadyButtonMode ReadyButtonStatus
+	{
+		get { return _readyButtonStatus; }
+		set
+		{
+			_readyButtonStatus = value;
+			_readyButtonReadyObj.SetActive(value == ReadyButtonMode.kReady);
+			_readyButtonCancelObj.SetActive(value == ReadyButtonMode.kCancel);
+		}
+	}
 
 	public void EnableSetReadyButton(Action<bool> setReady)
 	{
-		// TODO(sorae): bind setReady to ready button
+		this.ReadyButtonStatus = ReadyButtonMode.kReady;
+
+		_readyButton.onClick.AddListener(
+			() => setReady(this.ReadyButtonStatus == ReadyButtonMode.kReady ? true : false));
 	}
 
 	public void ShowGameStart()
@@ -67,15 +87,14 @@ public class GameUI : MonoBehaviour
 		// TODO(sorae): impl..
 	}
 
-	public IEnumerator WaitForNicknameInput(Func<string, bool> nicknameValidator)
+	public IEnumerator WaitForNicknameInput(Func<string, bool> nicknameValidator, CoroutineResult<string> nickname)
 	{
-		var nickname = string.Empty;
 		var isOkButtonClicked = false;
 
 		_nicknameInputPopup.OnOKButtonClicked
 			+= input =>
 			{
-				nickname = input;
+				nickname.Set(input);
 				isOkButtonClicked = true;
 			};
 

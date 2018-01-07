@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
 
 	private bool _isGameStarted = false;
 
+	private string _currentGameID = default(string);
+
 	public void Awake()
 	{
 		installHandlers();
@@ -28,18 +30,46 @@ public class GameManager : MonoBehaviour
 			+= this.onSCGameStart;
 		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_joined] 
 			+= this.onSCPlayerJoined;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_join_match]
+			+= this.onSCJoinMatch;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_ready]
+			+= this.onSCPlayerReady;
+	}
+
+	private void onSCJoinMatch(object source)
+	{
+		var packet = source as SCJoinMatch;
+
+		_ui.NameTags[0].Nickname = packet.room_state.nickname_1;
+		_ui.NameTags[1].Nickname = packet.room_state.nickname_2;
+		_ui.NameTags[2].Nickname = packet.room_state.nickname_3;
+		_ui.NameTags[3].Nickname = packet.room_state.nickname_4;
+
+		_ui.NameTags[0].IsEnabled = true;
+		_ui.NameTags[1].IsEnabled = true;
+		_ui.NameTags[2].IsEnabled = true;
+		_ui.NameTags[3].IsEnabled = true;
 	}
 
 	private void onSCPlayerJoined(object source)
 	{
 		var packet = source as SCPlayerJoined;
 
-		// TODO(sorae): set view
+		_ui.NameTags[packet.player_id].Nickname = packet.nickname;
+	}
+
+	private void onSCPlayerReady(object source)
+	{
+		var packet = source as SCPlayerReady;
+
+		_ui.NameTags[packet.client_index].IsReadyTagEnabled = packet.is_ready;
 	}
 
 	private void onSCGameStart(object source)
 	{
 		var packet = source as SCGameStart;
+
+		this._currentGameID = packet.game_id;
 
 		_ui.ShowGameStart();
 		this._isGameStarted = true;
@@ -90,7 +120,10 @@ public class GameManager : MonoBehaviour
 		Func<string, bool> isValidNickname = source =>
 			!!!string.IsNullOrEmpty(source) && source.Length >= 2 && source.Length <= 8;
 
-		yield return _ui.WaitForNicknameInput(isValidNickname);
+		var nickname = new CoroutineResult<string>();
+		yield return _ui.WaitForNicknameInput(isValidNickname, nickname);
+
+		this._nickname = nickname;
 
 		_ui.IsNicknameInputEnabled = false;
 	}
