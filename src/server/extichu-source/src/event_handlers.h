@@ -10,6 +10,7 @@
 #include "extichu_rpc_messages.pb.h"
 #include "extichu_types.h"
 
+#include "extichu_room.h"
 
 namespace extichu {
 

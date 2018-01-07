@@ -36,10 +36,10 @@ set(USE_CCACHE true)
 set(CONTACT_EMAIL "contact@yourcompany.com")
 
 # Generate a distribution package in tgz?
-set(WANT_TGZ_PACKAGE true)
+set(WANT_TGZ_PACKAGE false)
 
 # Generate a distribution package in Debian DEB?
-set(WANT_DEB_PACKAGE false)
+set(WANT_DEB_PACKAGE true)
 
 # Generate a distribution package in Redhat RPM?
 set(WANT_RPM_PACKAGE false)
@@ -77,7 +77,7 @@ set(RESOURCE_DIRS game_data client_data src/json_protocols)
 
 
 # Needs C++1x features? (Requires modern C++ compiler)
-set(WANT_CXX17 true)
+set(WANT_CXX11 true)
 
 
 # Shows compiler warnings?
