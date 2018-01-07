@@ -12,6 +12,12 @@ import "funapi/network/fun_message.proto";
 
 // Your specific message class.
 
+/*
+	index : starts with 0
+	 - ex) player_index -> players[0], players[1] ...
+	number : starts with 1
+	 - ex) player_nuber -> player1, player2, ...
+*/
 message PbCard
 {
 	enum Shape
