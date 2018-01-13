@@ -11,6 +11,11 @@ set(
   event_handlers.cc
   event_handlers.h
   ${PROJECT_NAME}_server.cc
+  ${PROJECT_NAME}_room.cc
+  ${PROJECT_NAME}_room.h
+  ${PROJECT_NAME}_player.cc
+  ${PROJECT_NAME}_player.h
+  ${PROJECT_NAME}_types.h
 )
 
 set(
