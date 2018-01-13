@@ -10,6 +10,7 @@
 #include "extichu_messages.pb.h"
 
 #include "extichu_player.h"
+#include "extichu_room.h"
 
 
 // You can differentiate game server flavors.
@@ -56,7 +57,7 @@ void OnJoinMatch(const Ptr<Session> &session, const Ptr<FunMessage> &message)
   Ptr<ExtPlayer> player = boost::make_shared<ExtPlayer>(id, nickname);
 
   // 이 함수 안에서 이미 방 안에 있는 사람들에게 메시지 보냄.
-  auto room = JoinOrCreateRoom(player);
+  auto room = ExtRoom::JoinOrCreateRoom(player);
   int count = 0;
 
   Ptr<FunMessage> retMsg(new FunMessage);

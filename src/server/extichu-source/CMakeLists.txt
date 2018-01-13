@@ -45,7 +45,7 @@ set(WANT_DEB_PACKAGE true)
 set(WANT_RPM_PACKAGE false)
 
 # Source managed by git can append a build number from git commit id.
-set(PACKAGE_WITH_BUILD_NUMBER_FROM_GIT false)
+set(PACKAGE_WITH_BUILD_NUMBER_FROM_GIT true)
 
 # Source managed by svn can append a build number from svn info.
 set(PACKAGE_WITH_BUILD_NUMBER_FROM_SVN false)
