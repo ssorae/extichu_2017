@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
 		this._currentGameID = packet.game_id;
 
 		_ui.ShowGameStart();
+		this._currentGameID = packet.game_id;
 		this._isGameStarted = true;
 	}
 
