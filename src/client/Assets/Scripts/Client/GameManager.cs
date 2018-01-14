@@ -3,6 +3,7 @@ using Fun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -32,6 +33,8 @@ public class GameManager : MonoBehaviour
 			+= this.onSCPlayerJoined;
 		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_ready]
 			+= this.onSCPlayerReady;
+		NetworkManager.Instance.OnMessageReceived[MessageType.sc_handout]
+			+= this.onSCHandout;
 	}
 
 	private void setNameTags(params string[] names)
@@ -72,6 +75,21 @@ public class GameManager : MonoBehaviour
 		this._isGameStarted = true;
 	}
 
+	private void onSCHandout(object source)
+	{
+		var packet = source as SCHandout;
+
+		Action<int, IEnumerable<PbCard>> addCardViewToHand
+			= (playerIndex, cardInfos) =>
+				_ui.HandViews[playerIndex].AddCards(
+					cardInfos.Select(cardInfo => CardView.Factory.Create(cardInfo.ToCardInfo())));
+
+		addCardViewToHand(0, packet.cards_1);
+		addCardViewToHand(1, packet.cards_2);
+		addCardViewToHand(2, packet.cards_3);
+		addCardViewToHand(3, packet.cards_4);
+	}
+
 	public IEnumerator Start()
 	{
 		yield return this.mainRoutine();
@@ -95,8 +113,16 @@ public class GameManager : MonoBehaviour
 		while (!!!_isGameStarted)
 			yield return null;
 
+		yield return firstHandoutRoutine();
 
+	}
 
+	private IEnumerator firstHandoutRoutine()
+	{
+		SCHandout response = null;
+		
+
+		yield break;
 	}
 
 	private void setReady(bool isReady)

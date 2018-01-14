@@ -69,7 +69,7 @@ public class CardView : MonoBehaviour
 				};
 
 				var cardInfo = new CardInfo {
-					IsHidden = false, number = eachNum, Shape = eachShape };
+					IsHidden = false, Number = eachNum, Shape = eachShape };
 				var filename = string.Format("{0}_{1}",
 					(int)eachShape, numToChar(eachNum));
 

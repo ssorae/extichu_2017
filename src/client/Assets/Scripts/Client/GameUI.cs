@@ -15,6 +15,10 @@ public class GameUI : MonoBehaviour
 	public IReadOnlyList<NameTag> NameTags { get { return _nametags; } }
 
 	[SerializeField]
+	private List<HandView> _handViews = null;
+	public IReadOnlyList<HandView> HandViews { get { return _handViews; } }
+
+	[SerializeField]
 	private GameObject _joiningMessageObject = null;
 
 	[SerializeField]

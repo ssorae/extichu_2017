@@ -17,17 +17,17 @@ public struct CardInfo
 	}
 
 	public bool IsHidden;
-	public int? number;
+	public int? Number;
 	public ShapeType? Shape;
 
 	public static readonly CardInfo Unknown 
-		= new CardInfo { IsHidden = true, number = null, Shape = null };
+		= new CardInfo { IsHidden = true, Number = null, Shape = null };
 	public static readonly CardInfo Dragon
-		 = new CardInfo { IsHidden = false, number = null, Shape = ShapeType.kDragon };
+		 = new CardInfo { IsHidden = false, Number = null, Shape = ShapeType.kDragon };
 	public static readonly CardInfo Phoenix
-		 = new CardInfo { IsHidden = false, number = null, Shape = ShapeType.kPhoenix};
+		 = new CardInfo { IsHidden = false, Number = null, Shape = ShapeType.kPhoenix};
 	public static readonly CardInfo Doggy
-		 = new CardInfo { IsHidden = false, number = null, Shape = ShapeType.kDoggy };
+		 = new CardInfo { IsHidden = false, Number = null, Shape = ShapeType.kDoggy };
 	public static readonly CardInfo Mahjong
-		 = new CardInfo { IsHidden = false, number = null, Shape = ShapeType.kMahjong };
+		 = new CardInfo { IsHidden = false, Number = null, Shape = ShapeType.kMahjong };
 }

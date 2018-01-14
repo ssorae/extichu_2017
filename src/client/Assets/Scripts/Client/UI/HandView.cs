@@ -9,4 +9,9 @@ public class HandView : MonoBehaviour
 	[SerializeField]
 	// Enable mouse interaction
 	private bool _isInteractable = false;
+
+	public void AddCards(IEnumerable<CardView> cardView)
+	{
+
+	}
 }
