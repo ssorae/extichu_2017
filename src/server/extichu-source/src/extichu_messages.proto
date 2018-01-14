@@ -20,13 +20,6 @@ import "funapi/network/fun_message.proto";
 */
 message PbCard
 {
-	enum SpecialCardType
-	{
-		DRAGON  = 0;
-		PHEONIX = 1;
-		DOGGY   = 2;
-		MAHJONG = 3;
-	}
 	enum Shape
 	{
 		SHAPE_1       = 1;
