@@ -49,6 +49,8 @@ public class GameUI : MonoBehaviour
 
 		this._nametags.ForEach(eachTag => eachTag.IsEnabled = false);
 		this.IsJoiningMsgEnabled = false;
+
+		CardView.LoadResources();
 	}
 
 	public enum ReadyButtonMode

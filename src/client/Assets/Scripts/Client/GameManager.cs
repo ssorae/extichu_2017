@@ -30,20 +30,16 @@ public class GameManager : MonoBehaviour
 			+= this.onSCGameStart;
 		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_joined] 
 			+= this.onSCPlayerJoined;
-		NetworkManager.Instance.OnMessageReceived[MessageType.sc_join_match]
-			+= this.onSCJoinMatch;
 		NetworkManager.Instance.OnMessageReceived[MessageType.sc_player_ready]
 			+= this.onSCPlayerReady;
 	}
 
-	private void onSCJoinMatch(object source)
+	private void setNameTags(params string[] names)
 	{
-		var packet = source as SCJoinMatch;
-
-		_ui.NameTags[0].Nickname = packet.room_state.nickname_1;
-		_ui.NameTags[1].Nickname = packet.room_state.nickname_2;
-		_ui.NameTags[2].Nickname = packet.room_state.nickname_3;
-		_ui.NameTags[3].Nickname = packet.room_state.nickname_4;
+		_ui.NameTags[0].Nickname = names[0];
+		_ui.NameTags[1].Nickname = names[1];
+		_ui.NameTags[2].Nickname = names[2];
+		_ui.NameTags[3].Nickname = names[3];
 
 		_ui.NameTags[0].IsEnabled = true;
 		_ui.NameTags[1].IsEnabled = true;
@@ -149,9 +145,11 @@ public class GameManager : MonoBehaviour
 		}
 
 		_ui.IsJoiningMsgEnabled = false;
-
-		// TODO(sorae): set view from SCJoinMatch datas
-		
+		this.setNameTags(
+			response.room_state.nickname_1, 
+			response.room_state.nickname_2,
+			response.room_state.nickname_3,
+			response.room_state.nickname_4);
 	}
 
 	private IEnumerator connectToServer()
