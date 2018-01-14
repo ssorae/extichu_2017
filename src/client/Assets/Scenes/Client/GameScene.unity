@@ -592,7 +592,7 @@ Prefab:
     - target: {fileID: 224019575057158178, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: -17.87234
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224369048726874172, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
@@ -602,7 +602,7 @@ Prefab:
     - target: {fileID: 224369048726874172, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: -17.87234
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224518037424635384, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
@@ -612,7 +612,7 @@ Prefab:
     - target: {fileID: 224518037424635384, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 24.01766
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224848974710238910, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
@@ -622,7 +622,7 @@ Prefab:
     - target: {fileID: 224848974710238910, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 24.01766
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224645949404687016, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
@@ -632,7 +632,7 @@ Prefab:
     - target: {fileID: 224645949404687016, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 24.01766
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224397365024083528, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
@@ -642,7 +642,7 @@ Prefab:
     - target: {fileID: 224397365024083528, guid: 5934c1ef2460fea4c9a7f22f4fcc691a,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 24.01766
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5934c1ef2460fea4c9a7f22f4fcc691a, type: 2}
