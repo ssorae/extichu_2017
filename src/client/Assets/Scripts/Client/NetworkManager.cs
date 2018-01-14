@@ -6,7 +6,7 @@ using UnityEngine;
 
 public abstract class NetworkManager : MonoBehaviour
 {
-	public virtual void Awake()
+	public NetworkManager()
 	{
 		this.OnMessageReceived.Clear();
 		this._temporalHandlers.Clear();

@@ -26,7 +26,9 @@ public class ServerNetwork : NetworkManager
 	}
 
 	public override void SendMessage<TPacket>(MessageType packetType, TPacket packet)
-		=> _session.SendMessage(packetType, packet);
+	{
+		_session.SendMessage(packetType, FunapiMessage.CreateFunMessage(packet, packetType));
+	}
 
 	private void onTransportEvent(TransportProtocol protocol, TransportEventType type)
 	{
